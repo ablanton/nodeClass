@@ -20,8 +20,8 @@ app.get('/view', (req, res) => {
 // Create HTTP server (Express doesn't create one by default for WebSocket attachment)
 const server = http.createServer(app);
 
-// Attach WebSocket server on the same port
-const wss = new WebSocketServer({ server });
+// Attach WebSocket server on /ws (Render and many proxies expect a dedicated path)
+const wss = new WebSocketServer({ server, path: '/ws' });
 
 wss.on('connection', (ws) => {
   console.log('Client connected');

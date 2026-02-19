@@ -53,7 +53,7 @@
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
 
     function connect() {
-      ws = new WebSocket(protocol + '//' + location.host);
+      ws = new WebSocket(protocol + '//' + location.host + '/ws');
       ws.onopen = () => {
         statusEl.textContent = 'Connected';
         statusEl.classList.add('connected');

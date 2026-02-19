@@ -47,20 +47,30 @@
     let value = 0;
     let dragging = false;
     let startX, startY, startValue;
+    let ws;
+    let reconnectDelay = 1000;
+    const maxReconnectDelay = 10000;
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(protocol + '//' + location.host);
 
-    ws.onopen = () => {
-      statusEl.textContent = 'Connected';
-      statusEl.classList.add('connected');
-    };
-    ws.onclose = () => {
-      statusEl.textContent = 'Disconnected';
-      statusEl.classList.remove('connected');
-    };
+    function connect() {
+      ws = new WebSocket(protocol + '//' + location.host);
+      ws.onopen = () => {
+        statusEl.textContent = 'Connected';
+        statusEl.classList.add('connected');
+        reconnectDelay = 1000;
+      };
+      ws.onclose = () => {
+        statusEl.textContent = 'Reconnecting…';
+        statusEl.classList.remove('connected');
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, maxReconnectDelay);
+      };
+      ws.onerror = () => {};
+    }
+    connect();
 
     function send() {
-      if (ws.readyState === WebSocket.OPEN) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ value }));
       }
     }

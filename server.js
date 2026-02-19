@@ -4,7 +4,7 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3000;
 
 // Serve static files from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -38,8 +38,8 @@ wss.on('connection', (ws) => {
   ws.on('close', () => console.log('Client disconnected'));
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log('  Drag page: http://localhost:' + PORT + '/');
-  console.log('  View page: http://localhost:' + PORT + '/view');
+server.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log('  Drag page: /');
+  console.log('  View page: /view');
 });

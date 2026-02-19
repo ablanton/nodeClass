@@ -39,23 +39,35 @@
   <script>
     const el = document.getElementById('number');
     const statusEl = document.getElementById('status');
+    let ws;
+    let reconnectDelay = 1000;
+    const maxReconnectDelay = 10000;
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(protocol + '//' + location.host);
 
-    ws.onopen = () => {
-      statusEl.textContent = 'Connected';
-      statusEl.classList.add('connected');
-    };
-    ws.onclose = () => {
-      statusEl.textContent = 'Disconnected';
-      statusEl.classList.remove('connected');
-    };
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (typeof data.value === 'number') {
-        el.textContent = data.value;
-      }
-    };
+    function connect() {
+      ws = new WebSocket(protocol + '//' + location.host);
+      ws.onopen = () => {
+        statusEl.textContent = 'Connected';
+        statusEl.classList.add('connected');
+        reconnectDelay = 1000;
+      };
+      ws.onclose = () => {
+        statusEl.textContent = 'Reconnecting…';
+        statusEl.classList.remove('connected');
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, maxReconnectDelay);
+      };
+      ws.onerror = () => {};
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (typeof data.value === 'number') {
+            el.textContent = data.value;
+          }
+        } catch (_) {}
+      };
+    }
+    connect();
   </script>
 </body>
 </html>
